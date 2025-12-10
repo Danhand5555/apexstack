@@ -1,0 +1,175 @@
+@import './variables.css';
+@import './animations.css';
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    font-family: var(--font-sans);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Responsive Card Styles - SUPER SIZED */
+.card {
+    width: 120px;
+    /* Mobile: 100px -> 120px */
+    height: 180px;
+    /* Mobile: 150px -> 180px */
+    background: white;
+    border-radius: var(--radius-md);
+    border: 1px solid #ccc;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 8px;
+    position: relative;
+    font-weight: bold;
+    font-size: 2.5rem;
+    user-select: none;
+}
+
+.card.red {
+    color: var(--color-crimson);
+}
+
+.card.black {
+    color: black;
+}
+
+.card-hidden {
+    background: linear-gradient(135deg, #1f1c2c 0%, #928dab 100%);
+    border: 3px solid white;
+}
+
+.card-value-top {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    font-size: 1.5rem;
+}
+
+.card-value-bottom {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    font-size: 1.5rem;
+    transform: rotate(180deg);
+}
+
+.card-suit {
+    font-size: 4rem;
+}
+
+/* Desktop Styles - ENORMOUS */
+@media (min-width: 768px) {
+    .card {
+        width: 200px;
+        /* Desktop: 160px -> 200px */
+        height: 300px;
+        /* Desktop: 240px -> 300px */
+        border-radius: 16px;
+        font-size: 5rem;
+        margin: 20px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-value-top,
+    .card-value-bottom {
+        font-size: 2.5rem;
+        top: 20px;
+        left: 20px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .card-suit {
+        font-size: 8rem;
+    }
+}
+
+/* Table styling for better views */
+.game-table {
+    background: var(--color-bg);
+    /* Use global dark theme (approx #0F172A via variables if updated, or override here) */
+    background: #0F172A;
+    /* Enforce the Premium Slate 900 everywhere */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Player View Specifics */
+.player-table {
+    background: var(--color-crimson);
+    /* Keep Player red for distinct role feel, or switch to Slate if desired */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+}
+
+/* Action Button Styles */
+.btn-action {
+    padding: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background: var(--color-crimson);
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--color-text-main);
+    color: white;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--color-text-main);
+    color: var(--color-text-main);
+}

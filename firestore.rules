@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Core Room Rules
+    match /rooms/{roomCode} {
+      allow read: if true; // Public to read room status
+      allow create: if true; // Anyone can create a room
+      allow update: if true; // Simplified: Clients update deck/state in this MVP (In prod, move to Backend/Functions)
+      
+      // Players Subcollection
+      match /players/{playerId} {
+        // Public Data: Everyone can read basic status/chip count?
+        // Requirement: "shows only the specific player's private cards"
+        
+        // Split data? In this MVP, we store hand in the player doc.
+        // We allow the "owner" to read everything.
+        // We allow others to read "public" fields? Firestore doesn't support field-level rules easily without separate docs.
+        // BUT, we can restrict read based on ID.
+        
+        // For MVP: Allow read if resource.id == request.auth.uid (if using Auth). 
+        // Since we are using custom IDs ("banker_timestamp"), we can't easily enforce auth-based rules without real Auth.
+        // PROPOSED RULE for MVP (Concept):
+        
+        allow read: if true; // MVP Compromise: In a real app with Auth, use: request.auth.uid == playerId
+        allow write: if true; 
+      }
+    }
+  }
+}
