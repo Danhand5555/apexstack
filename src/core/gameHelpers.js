@@ -215,7 +215,12 @@ export const playDealerTurn = async (roomCode) => {
                 chips,
                 status: 'round_end',
                 lastResult: result,
-                lastValue: pHandValue
+                lastValue: pHandValue,
+                history: arrayUnion({
+                    result,
+                    value: pHandValue,
+                    timestamp: Date.now()
+                })
             });
         });
 

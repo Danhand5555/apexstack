@@ -155,6 +155,19 @@ const BankerView = () => {
                                 </span>
                                 <span style={{ color: 'var(--color-gold)' }}>${p.chips}</span>
                             </div>
+                            {/* HISTORY BADGES */}
+                            <div style={{ display: 'flex', gap: '4px', marginTop: '8px', flexWrap: 'wrap' }}>
+                                {p.history?.slice(-5).map((h, i) => ( // Show last 5
+                                    <div key={i} style={{
+                                        width: '20px', height: '20px', borderRadius: '50%',
+                                        background: h.result === 'win' ? '#10B981' : h.result === 'loss' ? '#EF4444' : '#64748B',
+                                        color: 'white', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontWeight: 'bold'
+                                    }} title={`Score: ${h.value}`}>
+                                        {h.result === 'win' ? 'W' : h.result === 'loss' ? 'L' : 'P'}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     ))}
                 </div>
