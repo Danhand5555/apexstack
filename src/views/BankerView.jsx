@@ -155,6 +155,17 @@ const BankerView = () => {
                                 </span>
                                 <span style={{ color: 'var(--color-gold)' }}>${p.chips}</span>
                             </div>
+
+                            {/* PLAYER HAND */}
+                            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '2px', margin: '10px 0', minHeight: '60px' }}>
+                                {p.hand?.map((card, i) => (
+                                    <div key={i} style={{ transform: 'scale(0.5)', width: '30px', height: '45px', transformOrigin: 'top left', marginRight: '-20px' }}>
+                                        <Card {...card} />
+                                    </div>
+                                ))}
+                                {(!p.hand || p.hand.length === 0) && <div style={{ fontSize: '0.7rem', color: '#666', fontStyle: 'italic' }}>No cards</div>}
+                            </div>
+
                             {/* HISTORY BADGES */}
                             <div style={{ display: 'flex', gap: '4px', marginTop: '8px', flexWrap: 'wrap' }}>
                                 {p.history?.slice(-5).map((h, i) => ( // Show last 5
