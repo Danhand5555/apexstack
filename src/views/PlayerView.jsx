@@ -36,7 +36,7 @@ const PlayerView = () => {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}>
                     {gameState?.dealerHand?.map((card, i) => (
-                        <div key={i} style={{ transform: 'scale(0.8)' }}>
+                        <div key={i} style={{ transform: 'scale(0.6)' }}>
                             <Card {...card} />
                         </div>
                     ))}
@@ -120,7 +120,7 @@ const PlayerView = () => {
                                     {(!p.hand || p.hand.length === 0) && <div style={{ height: '30px', fontSize: '0.7rem', opacity: 0.5 }}>No cards</div>}
                                 </div>
                                 <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '5px' }}>
-                                    {p.status === 'playing' ? 'Playing...' : (p.status === 'stand' ? 'Stand' : p.status)}
+                                    {p.status === 'playing' ? 'Playing...' : (p.status === 'stood' || p.status === 'stand' ? 'STAND' : p.status)}
                                 </div>
                             </div>
                         ))}

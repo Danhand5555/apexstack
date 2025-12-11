@@ -38,7 +38,7 @@ const BankerView = () => {
         }
     };
 
-    const activePlayersCount = players.filter(p => p.status === 'playing' || p.status === 'active').length;
+    const activePlayersCount = players.filter(p => p.status === 'playing' || p.status === 'active' || p.status === 'stood').length;
     const totalPot = players.reduce((acc, p) => acc + (p.status === 'playing' ? 100 : 0), 0); // Est pot
 
     return (
@@ -139,7 +139,7 @@ const BankerView = () => {
             <div style={{ background: '#0F172A', padding: '20px', borderTop: '1px solid #334155' }}>
                 <h3 style={{ color: '#94A3B8', fontSize: '0.9rem', margin: '0 0 10px 0', textTransform: 'uppercase' }}>Round Results</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
-                    {players.filter(p => p.role === 'player' && (p.status === 'round_end' || p.status === 'playing')).map(p => (
+                    {players.filter(p => p.role === 'player' && (p.status === 'round_end' || p.status === 'playing' || p.status === 'stood')).map(p => (
                         <div key={p.id} style={{
                             background: p.lastResult === 'win' ? 'rgba(16, 185, 129, 0.2)' : p.lastResult === 'loss' ? 'rgba(239, 68, 68, 0.2)' : '#1E293B',
                             border: `1px solid ${p.lastResult === 'win' ? '#10B981' : p.lastResult === 'loss' ? '#EF4444' : '#334155'}`,
@@ -151,7 +151,7 @@ const BankerView = () => {
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px', fontSize: '0.8rem' }}>
                                 <span style={{ color: p.lastResult === 'win' ? '#34D399' : p.lastResult === 'loss' ? '#F87171' : '#94A3B8' }}>
-                                    {p.lastResult ? p.lastResult.toUpperCase() : 'PLAYING'}
+                                    {p.lastResult ? p.lastResult.toUpperCase() : (p.status === 'stood' ? 'STAND' : 'PLAYING')}
                                 </span>
                                 <span style={{ color: 'var(--color-gold)' }}>${p.chips}</span>
                             </div>
