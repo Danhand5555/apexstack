@@ -107,7 +107,12 @@ export const dealInitialHands = async (roomCode) => {
     for (const player of players) {
         const hand = [deck.pop(), deck.pop()];
         const pRef = doc(db, "rooms", roomCode, "players", player.id);
-        batch.update(pRef, { hand, status: 'playing' });
+        batch.update(pRef, {
+            hand,
+            status: 'playing',
+            lastResult: null,
+            lastValue: null
+        });
     }
 
     const dealerHand = [deck.pop(), deck.pop()];
