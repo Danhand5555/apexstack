@@ -63,7 +63,13 @@ const ObserverView = () => {
                                 <span style={{ color: 'var(--color-gold)' }}>${p.chips}</span>
                             </div>
                             <div style={{ textAlign: 'center', color: '#888', marginBottom: '10px' }}>
-                                {p.status.toUpperCase()}
+                                {p.status === 'round_end' ? (
+                                    <span style={{ color: p.lastResult === 'win' ? 'var(--color-success)' : p.lastResult === 'loss' ? 'var(--color-crimson)' : '#888' }}>
+                                        {p.lastResult ? p.lastResult.toUpperCase() : 'ROUND END'}
+                                    </span>
+                                ) : (
+                                    p.status === 'stood' ? 'STAND' : p.status.toUpperCase()
+                                )}
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '-20px' }}>
                                 {p.hand?.map((card, i) => (

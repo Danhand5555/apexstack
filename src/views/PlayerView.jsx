@@ -46,7 +46,12 @@ const PlayerView = () => {
 
             {/* MY HAND AREA */}
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1 style={{ margin: 0 }}>Your Hand</h1>
+                <div>
+                    <h1 style={{ margin: 0 }}>Your Hand</h1>
+                    <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginTop: '5px' }}>
+                        TARGET: <strong style={{ color: 'var(--color-success)' }}>${gameState?.winningGoal}</strong>
+                    </div>
+                </div>
                 <div className="chip-badge" style={{ background: 'rgba(0,0,0,0.3)', padding: '5px 15px', borderRadius: '20px', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.1)' }}>
                     ${playerData?.chips || 0}
                 </div>
