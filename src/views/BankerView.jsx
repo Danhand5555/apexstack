@@ -157,13 +157,19 @@ const BankerView = () => {
                             </div>
 
                             {/* PLAYER HAND */}
-                            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '2px', margin: '10px 0', minHeight: '60px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '5px', margin: '10px 0', minHeight: '80px' }}>
                                 {p.hand?.map((card, i) => (
-                                    <div key={i} style={{ transform: 'scale(0.5)', width: '30px', height: '45px', transformOrigin: 'top left', marginRight: '-20px' }}>
-                                        <Card {...card} />
+                                    <div key={i} style={{
+                                        transform: 'scale(0.3)',
+                                        width: '60px',
+                                        height: '90px',
+                                        transformOrigin: 'top left',
+                                        marginRight: '-30px'
+                                    }}>
+                                        <Card {...card} style={{ margin: 0, boxShadow: 'none' }} />
                                     </div>
                                 ))}
-                                {(!p.hand || p.hand.length === 0) && <div style={{ fontSize: '0.7rem', color: '#666', fontStyle: 'italic' }}>No cards</div>}
+                                {(!p.hand || p.hand.length === 0) && <div style={{ fontSize: '0.7rem', color: '#666', fontStyle: 'italic', width: '100%', textAlign: 'center' }}>No cards</div>}
                             </div>
 
                             {/* HISTORY BADGES */}
