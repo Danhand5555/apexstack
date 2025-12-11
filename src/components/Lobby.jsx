@@ -37,7 +37,7 @@ const Lobby = ({ onGameStart }) => {
         try {
             await joinAsRole(roomCode, playerId, role, playerName);
             setPlayerRole(role);
-            setMyStatus('waiting');
+            setMyStatus(role === 'observer' ? 'active' : 'waiting');
         } catch (e) { console.error(e); }
     };
 

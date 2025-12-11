@@ -59,7 +59,7 @@ export const joinAsRole = async (roomCode, playerId, role, playerName) => {
     await setDoc(playerRef, {
         id: playerId,
         role: role,
-        status: 'waiting', // Waiting for banker confirmation
+        status: role === 'observer' ? 'active' : 'waiting', // Observers auto-join
         chips: 1000, // Default start
         name: playerName || `Player ${playerId.slice(-4)}`
     });
