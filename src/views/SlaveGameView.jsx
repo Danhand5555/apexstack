@@ -429,7 +429,6 @@ const SlaveGameView = () => {
                     </div>
                 </div>
             )}
-
             {/* GAME COMPLETE OVERLAY */}
             {gameState?.slaveRoundStatus === 'gameComplete' && (
                 <div style={{
@@ -466,10 +465,11 @@ const SlaveGameView = () => {
                         }}>
                             <h2 style={{ color: 'white', marginBottom: '20px', fontSize: '1.3rem' }}>🏆 Final Standings</h2>
 
-                            {(gameState?.finalStandings || []).map((standing, idx) => {
+                            {(gameState?.finalStandings || []).map((standing, idx, arr) => {
                                 const player = players.find(p => p.id === standing.id);
                                 const isMe = standing.id === playerId;
                                 const isWinner = idx === 0;
+                                const isLoser = idx === arr.length - 1 && arr.length > 1;
 
                                 return (
                                     <div key={standing.id} style={{
@@ -480,11 +480,17 @@ const SlaveGameView = () => {
                                         marginBottom: '10px',
                                         background: isWinner
                                             ? 'linear-gradient(135deg, rgba(251,191,36,0.3), rgba(245,158,11,0.2))'
-                                            : isMe
-                                                ? 'rgba(34, 197, 94, 0.2)'
-                                                : 'rgba(255,255,255,0.05)',
+                                            : isLoser
+                                                ? 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(185,28,28,0.1))'
+                                                : isMe
+                                                    ? 'rgba(34, 197, 94, 0.2)'
+                                                    : 'rgba(255,255,255,0.05)',
                                         borderRadius: '12px',
-                                        border: isWinner ? '2px solid #fbbf24' : 'none',
+                                        border: isWinner
+                                            ? '2px solid #fbbf24'
+                                            : isLoser
+                                                ? '2px solid #ef4444'
+                                                : 'none',
                                         animation: 'bounceIn 0.5s ease-out',
                                         animationDelay: `${idx * 0.1}s`,
                                         animationFillMode: 'both'
@@ -494,16 +500,28 @@ const SlaveGameView = () => {
                                                 fontSize: '1.5rem',
                                                 width: '40px'
                                             }}>
-                                                {isWinner ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
+                                                {isWinner ? '🥇' : isLoser ? '💀' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
                                             </span>
-                                            <span style={{
-                                                color: isWinner ? '#fbbf24' : 'white',
-                                                fontSize: '1.2rem',
-                                                fontWeight: 'bold'
-                                            }}>
-                                                {player?.name || standing.id.slice(0, 6)}
-                                                {isMe && ' (YOU)'}
-                                            </span>
+                                            <div>
+                                                <span style={{
+                                                    color: isWinner ? '#fbbf24' : isLoser ? '#ef4444' : 'white',
+                                                    fontSize: '1.2rem',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    {player?.name || standing.id.slice(0, 6)}
+                                                    {isMe && ' (YOU)'}
+                                                </span>
+                                                {isWinner && (
+                                                    <div style={{ fontSize: '0.8rem', color: '#22c55e', marginTop: '2px' }}>
+                                                        🏆 WINNER
+                                                    </div>
+                                                )}
+                                                {isLoser && (
+                                                    <div style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '2px' }}>
+                                                        💔 LAST PLACE
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         <div style={{ display: 'flex', gap: '20px', fontSize: '1rem' }}>
                                             <span style={{ color: '#fbbf24' }}>👑 {standing.president || 0}</span>

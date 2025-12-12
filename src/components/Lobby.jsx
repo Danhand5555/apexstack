@@ -84,6 +84,28 @@ const Lobby = ({ onGameStart }) => {
 
         return (
             <div style={containerStyle}>
+                {/* Back Button */}
+                <button
+                    onClick={() => window.location.reload()}
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
+                        left: '20px',
+                        padding: '10px 20px',
+                        background: 'rgba(255,255,255,0.05)',
+                        color: '#9ca3af',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}
+                >
+                    ← Home
+                </button>
+
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '30px' }}>
                     <div style={{
@@ -355,6 +377,28 @@ const Lobby = ({ onGameStart }) => {
     // --- PLAYER JOIN SCREEN ---
     return (
         <div style={containerStyle}>
+            {/* Back Button */}
+            <button
+                onClick={() => window.location.reload()}
+                style={{
+                    position: 'absolute',
+                    top: '20px',
+                    left: '20px',
+                    padding: '10px 20px',
+                    background: 'rgba(255,255,255,0.05)',
+                    color: '#9ca3af',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                }}
+            >
+                ← Home
+            </button>
+
             {/* Logo */}
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                 <h1 style={{
