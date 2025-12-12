@@ -255,13 +255,32 @@ export const passTurn = async (roomCode, playerId) => {
 
     let nextPlayer = getNextActivePlayer(playerId, playerOrder, null, winners);
 
-    // Trick clearing: If next player is the trick owner, clear the trick
-    if (nextPlayer === rData.trickOwnerId) {
-        await updateDoc(roomRef, {
-            currentTrickCards: [],
-            trickOwnerId: null,
-            turn: nextPlayer
-        });
+    // Check if only one active player remains (everyone else has won)
+    // In this case, passing means they win the trick by default
+    const activePlayers = playerOrder.filter(pid => !winners.includes(pid));
+    const onlyOneActivePlayer = activePlayers.length === 1;
+
+    // Trick clearing: If next player is the trick owner OR only one player remains
+    if (nextPlayer === rData.trickOwnerId || onlyOneActivePlayer) {
+        // If only one player left and they're the trick owner with no cards left,
+        // the round is complete
+        if (onlyOneActivePlayer) {
+            // The last remaining player is the slave - round complete
+            const lastPlayerId = activePlayers[0];
+            await updateDoc(roomRef, {
+                currentTrickCards: [],
+                trickOwnerId: null,
+                turn: lastPlayerId,
+                winners: [...winners, lastPlayerId],
+                slaveRoundStatus: 'completed'
+            });
+        } else {
+            await updateDoc(roomRef, {
+                currentTrickCards: [],
+                trickOwnerId: null,
+                turn: nextPlayer
+            });
+        }
     } else {
         await updateDoc(roomRef, {
             turn: nextPlayer
