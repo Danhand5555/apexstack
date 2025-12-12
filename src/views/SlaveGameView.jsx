@@ -46,11 +46,12 @@ const SlaveGameView = () => {
             // Deselect
             setSelectedCards(selectedCards.filter(c => !(c.suit === card.suit && c.value === card.value)));
         } else {
-            // Select - if already have 2, start new selection
-            if (selectedCards.length >= 2) {
+            // Select - allow up to 4 cards of the same rank
+            if (selectedCards.length >= 4) {
+                // Already have 4 cards, start new selection
                 setSelectedCards([card]);
-            } else if (selectedCards.length === 1) {
-                // Only allow selecting same rank for pairs
+            } else if (selectedCards.length >= 1) {
+                // Only allow selecting same rank for multiples
                 const firstRank = selectedCards[0].value;
                 if (card.value === firstRank) {
                     setSelectedCards([...selectedCards, card]);

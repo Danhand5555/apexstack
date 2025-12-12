@@ -21,17 +21,17 @@ export const sortHand = (hand) => {
 
 export const isValidPlay = (selectedCards, currentTrickCards) => {
     if (!selectedCards || selectedCards.length === 0) return false;
-    if (selectedCards.length > 2) return false; // Only Singles or Pairs
+    if (selectedCards.length > 4) return false; // Singles, Pairs, Triples, or Four-of-a-kind
 
-    // Check if all cards are same rank (required for pairs)
+    // Check if all cards are same rank (required for multiples)
     const firstRank = getCardRank(selectedCards[0].value);
-    if (selectedCards.length === 2) {
-        if (firstRank !== getCardRank(selectedCards[1].value)) {
+    for (let i = 1; i < selectedCards.length; i++) {
+        if (getCardRank(selectedCards[i].value) !== firstRank) {
             return false;
         }
     }
 
-    // If trick is empty, any valid single/pair is allowed
+    // If trick is empty, any valid play is allowed
     if (!currentTrickCards || currentTrickCards.length === 0) {
         return true;
     }
