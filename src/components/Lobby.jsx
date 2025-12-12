@@ -8,16 +8,16 @@ const Lobby = ({ onGameStart }) => {
     const { gameState, roomCode, playerId, playerRole, setPlayerRole } = useGame();
     const [players, setPlayers] = useState([]);
     const [myStatus, setMyStatus] = useState(playerRole === 'banker' ? 'active' : 'selecting');
-    const [goalInput, setGoalInput] = useState('1');
+    const [goalInput, setGoalInput] = useState('3');
+    const [playerName, setPlayerName] = useState('');
 
-    // Subscribe to players
     useEffect(() => {
         if (!roomCode) return;
         const q = query(collection(db, "rooms", roomCode, "players"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const pList = [];
             snapshot.forEach(doc => {
-                pList.push(doc.data());
+                pList.push({ ...doc.data(), id: doc.id });
                 if (doc.id === playerId) {
                     const newStatus = doc.data().status;
                     if (newStatus === 'active' && myStatus !== 'active') {
@@ -32,10 +32,8 @@ const Lobby = ({ onGameStart }) => {
     }, [roomCode, playerId, myStatus, onGameStart]);
 
     const handleRoleSelect = async (role) => {
-        const nameInput = document.getElementById('player-name-input');
-        const playerName = nameInput ? nameInput.value : '';
         try {
-            await joinAsRole(roomCode, playerId, role, playerName);
+            await joinAsRole(roomCode, playerId, role, playerName || 'Player');
             setPlayerRole(role);
             setMyStatus(role === 'observer' ? 'active' : 'waiting');
         } catch (e) { console.error(e); }
@@ -52,12 +50,10 @@ const Lobby = ({ onGameStart }) => {
     const handleStartGame = async () => {
         try {
             if (gameState?.gameType === 'slave') {
-                // Import dynamically or assuming it's imported at top
-                // Since this file is big, adding import at top is safer.
-                // But for tool efficiency, I will replace here.
                 const { startSlaveGame } = await import('../core/slaveHelpers');
                 await startSlaveGame(roomCode);
             } else {
+                const { dealInitialHands } = await import('../core/gameHelpers');
                 await dealInitialHands(roomCode);
             }
             onGameStart();
@@ -67,143 +63,432 @@ const Lobby = ({ onGameStart }) => {
         }
     };
 
-    // --- RENDER BANKER LOBBY ---
+    const isSlave = gameState?.gameType === 'slave';
+
+    // Shared styles
+    const containerStyle = {
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '40px 20px',
+        position: 'relative'
+    };
+
+    // --- HOST LOBBY ---
     if (playerRole === 'banker') {
         const waitingPlayers = players.filter(p => p.status === 'waiting' && p.role === 'player');
         const activePlayers = players.filter(p => p.status === 'active' && p.role === 'player');
-        const observers = players.filter(p => p.role === 'observer'); // Show all observers
-        const isSlave = gameState?.gameType === 'slave';
+        const observers = players.filter(p => p.role === 'observer');
 
         return (
-            <div className="game-table" style={{ padding: '40px', alignItems: 'center' }}>
-                <h1 style={{ color: 'var(--color-gold)', fontSize: '3.5rem', margin: 0 }}>LOBBY</h1>
-                <h2 style={{ color: 'white', letterSpacing: '2px', marginTop: '10px' }}>CODE: <span style={{ fontFamily: 'monospace', fontSize: '1.2em' }}>{roomCode}</span></h2>
-                <p style={{ color: '#888', marginTop: '5px' }}>Game: {isSlave ? '👑 SLAVE (President)' : '🃏 Blackjack'}</p>
-
-                {/* GAME SETTINGS */}
-                <div style={{ margin: '30px 0', display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(0,0,0,0.5)', padding: '20px', borderRadius: '12px' }}>
-                    <label style={{ color: 'white', fontWeight: 'bold' }}>
-                        {isSlave ? 'ROUND LIMIT:' : 'GAME GOAL ($):'}
-                    </label>
-                    <input
-                        type="number"
-                        value={goalInput}
-                        onChange={(e) => setGoalInput(e.target.value)}
-                        placeholder={isSlave ? '10' : '2000'}
-                        style={{ padding: '10px', borderRadius: '6px', border: '1px solid #666', fontSize: '1.2rem', background: '#333', color: 'white', width: '100px' }}
-                    />
-                    <button onClick={handleSetGoal} className="btn-action" style={{ padding: '10px 20px', fontSize: '1rem', background: 'var(--color-gold)', color: 'black' }}>
-                        SET {isSlave ? 'ROUNDS' : 'GOAL'}
-                    </button>
-                    {gameState?.winningGoal && (
-                        <span style={{ color: '#4caf50', marginLeft: '10px' }}>
-                            ✓ {isSlave ? `${gameState.winningGoal} rounds` : `$${gameState.winningGoal}`}
+            <div style={containerStyle}>
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        background: 'rgba(255,255,255,0.05)',
+                        padding: '15px 30px',
+                        borderRadius: '50px',
+                        marginBottom: '20px'
+                    }}>
+                        <span style={{ fontSize: '1.5rem' }}>{isSlave ? '👑' : '🃏'}</span>
+                        <span style={{ color: 'white', fontSize: '1.1rem', fontWeight: '500' }}>
+                            {isSlave ? 'PRESIDENT' : 'BLACKJACK'}
                         </span>
-                    )}
+                    </div>
+
+                    <h1 style={{
+                        color: '#fbbf24',
+                        fontSize: '3rem',
+                        margin: '0 0 10px 0',
+                        letterSpacing: '3px'
+                    }}>
+                        LOBBY
+                    </h1>
+
+                    <div style={{
+                        display: 'inline-block',
+                        background: 'linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.1))',
+                        padding: '15px 40px',
+                        borderRadius: '12px',
+                        border: '2px solid rgba(251,191,36,0.3)'
+                    }}>
+                        <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Room Code</span>
+                        <div style={{
+                            color: '#fbbf24',
+                            fontSize: '2.5rem',
+                            fontFamily: 'monospace',
+                            fontWeight: 'bold',
+                            letterSpacing: '8px'
+                        }}>
+                            {roomCode}
+                        </div>
+                    </div>
                 </div>
 
-                <div style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Settings Card */}
+                <div style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '20px',
+                    padding: '25px',
+                    width: '100%',
+                    maxWidth: '500px',
+                    marginBottom: '20px',
+                    border: '1px solid rgba(255,255,255,0.05)'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center'
+                    }}>
+                        <span style={{ color: '#9ca3af', fontWeight: '500' }}>
+                            {isSlave ? '🎯 Rounds:' : '💰 Goal:'}
+                        </span>
+                        <input
+                            type="number"
+                            value={goalInput}
+                            onChange={(e) => setGoalInput(e.target.value)}
+                            style={{
+                                width: '80px',
+                                padding: '12px 15px',
+                                background: 'rgba(0,0,0,0.3)',
+                                border: '2px solid rgba(255,255,255,0.1)',
+                                borderRadius: '10px',
+                                color: 'white',
+                                fontSize: '1.2rem',
+                                textAlign: 'center',
+                                fontWeight: 'bold'
+                            }}
+                        />
+                        <button
+                            onClick={handleSetGoal}
+                            style={{
+                                padding: '12px 25px',
+                                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '10px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            SET
+                        </button>
+                        {gameState?.winningGoal && (
+                            <span style={{ color: '#22c55e' }}>
+                                ✓ {isSlave ? `${gameState.winningGoal} rounds` : `$${gameState.winningGoal}`}
+                            </span>
+                        )}
+                    </div>
+                </div>
 
-                    {/* CONFIRMATION QUEUE */}
+                {/* Players Section */}
+                <div style={{ width: '100%', maxWidth: '500px' }}>
+
+                    {/* Waiting Queue */}
                     {waitingPlayers.length > 0 && (
-                        <div style={{ background: '#2c2c2c', padding: '20px', borderRadius: '12px', border: '1px solid #444' }}>
-                            <h3 style={{ color: 'var(--color-crimson)', margin: '0 0 15px 0' }}>WAITING TO JOIN ({waitingPlayers.length})</h3>
+                        <div style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            borderRadius: '16px',
+                            padding: '20px',
+                            marginBottom: '15px',
+                            border: '1px solid rgba(239, 68, 68, 0.2)'
+                        }}>
+                            <h3 style={{
+                                color: '#ef4444',
+                                margin: '0 0 15px 0',
+                                fontSize: '0.9rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px'
+                            }}>
+                                ⏳ Waiting ({waitingPlayers.length})
+                            </h3>
                             {waitingPlayers.map(p => (
-                                <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'rgba(255,255,255,0.05)', marginBottom: '5px', borderRadius: '6px' }}>
-                                    <span style={{ color: 'white', fontSize: '1.2rem' }}>{p.name}</span>
-                                    <button onClick={() => handleConfirm(p.id)} style={{ padding: '8px 20px', background: '#4caf50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                        CONFIRM
+                                <div key={p.id} style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '12px 15px',
+                                    background: 'rgba(0,0,0,0.2)',
+                                    borderRadius: '10px',
+                                    marginBottom: '8px'
+                                }}>
+                                    <span style={{ color: 'white', fontWeight: '500' }}>{p.name}</span>
+                                    <button
+                                        onClick={() => handleConfirm(p.id)}
+                                        style={{
+                                            padding: '8px 20px',
+                                            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem'
+                                        }}
+                                    >
+                                        ✓ ACCEPT
                                     </button>
                                 </div>
                             ))}
                         </div>
                     )}
 
-                    {/* ACTIVE ROSTER */}
-                    <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '12px', minHeight: '150px' }}>
-                        <h3 style={{ color: 'var(--color-text-secondary)', margin: '0 0 15px 0' }}>ACTIVE PLAYERS ({activePlayers.length})</h3>
-                        {activePlayers.length === 0 && <p style={{ color: '#666', textAlign: 'center' }}>No players confirmed yet.</p>}
-                        {activePlayers.map(p => (
-                            <div key={p.id} style={{ padding: '10px', borderBottom: '1px solid #333', color: 'white' }}>
-                                <span>{p.name}</span>
-                                {!isSlave && <span style={{ float: 'right', color: 'var(--color-gold)' }}>${p.chips}</span>}
-                            </div>
-                        ))}
+                    {/* Active Players */}
+                    <div style={{
+                        background: 'rgba(34, 197, 94, 0.05)',
+                        borderRadius: '16px',
+                        padding: '20px',
+                        marginBottom: '15px',
+                        border: '1px solid rgba(34, 197, 94, 0.1)',
+                        minHeight: '120px'
+                    }}>
+                        <h3 style={{
+                            color: '#22c55e',
+                            margin: '0 0 15px 0',
+                            fontSize: '0.9rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                        }}>
+                            ✓ Players Ready ({activePlayers.length})
+                        </h3>
+                        {activePlayers.length === 0 ? (
+                            <p style={{ color: '#4b5563', textAlign: 'center', margin: '20px 0' }}>
+                                Waiting for players to join...
+                            </p>
+                        ) : (
+                            activePlayers.map((p, idx) => (
+                                <div key={p.id} style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '12px 15px',
+                                    background: 'rgba(34, 197, 94, 0.1)',
+                                    borderRadius: '10px',
+                                    marginBottom: '8px'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <span style={{
+                                            width: '28px',
+                                            height: '28px',
+                                            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {idx + 1}
+                                        </span>
+                                        <span style={{ color: 'white', fontWeight: '500' }}>{p.name}</span>
+                                    </div>
+                                    <span style={{ color: '#22c55e', fontSize: '0.85rem' }}>Ready</span>
+                                </div>
+                            ))
+                        )}
                     </div>
 
-                    {/* OBSERVERS LIST */}
+                    {/* Observers */}
                     {observers.length > 0 && (
-                        <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '12px', minHeight: '100px', marginTop: '20px' }}>
-                            <h3 style={{ color: '#aaa', margin: '0 0 15px 0', fontSize: '0.9rem', textTransform: 'uppercase' }}>OBSERVERS ({observers.length})</h3>
-                            {observers.map(p => (
-                                <div key={p.id} style={{ padding: '8px', borderBottom: '1px solid #333', color: '#888', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span>{p.name}</span>
-                                    <span>{p.status}</span>
-                                    {p.status === 'waiting' && (
-                                        <button onClick={() => handleConfirm(p.id)} style={{ padding: '4px 10px', background: '#666', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                                            ALLOW
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
+                        <div style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            borderRadius: '12px',
+                            padding: '15px',
+                            marginBottom: '20px'
+                        }}>
+                            <h4 style={{ color: '#6b7280', margin: '0 0 10px 0', fontSize: '0.8rem' }}>
+                                👁 OBSERVERS ({observers.length})
+                            </h4>
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                {observers.map(p => (
+                                    <span key={p.id} style={{
+                                        padding: '6px 12px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        borderRadius: '20px',
+                                        color: '#9ca3af',
+                                        fontSize: '0.85rem'
+                                    }}>
+                                        {p.name}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     )}
 
+                    {/* Start Button */}
                     <button
                         onClick={handleStartGame}
-                        className="btn-action btn-primary"
                         disabled={activePlayers.length === 0}
-                        style={{ marginTop: '20px', width: '100%' }}
+                        style={{
+                            width: '100%',
+                            padding: '18px',
+                            background: activePlayers.length > 0
+                                ? 'linear-gradient(135deg, #22c55e, #16a34a)'
+                                : 'rgba(255,255,255,0.1)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '14px',
+                            fontSize: '1.2rem',
+                            fontWeight: 'bold',
+                            cursor: activePlayers.length > 0 ? 'pointer' : 'not-allowed',
+                            opacity: activePlayers.length > 0 ? 1 : 0.5,
+                            boxShadow: activePlayers.length > 0
+                                ? '0 10px 40px rgba(34, 197, 94, 0.3)'
+                                : 'none',
+                            transition: 'all 0.3s ease'
+                        }}
                     >
-                        START GAME
+                        🚀 START GAME
                     </button>
                 </div>
             </div>
         );
     }
 
-    // --- RENDER PLAYER/OBSERVER JOIN SCREEN ---
+    // --- PLAYER JOIN SCREEN ---
     return (
-        <div className="game-table" style={{ alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <h1 style={{ color: 'var(--color-gold)', fontSize: '4rem', margin: 0 }}>APEX</h1>
-            <h2 style={{ color: 'white', letterSpacing: '4px', marginBottom: '40px' }}>STACK</h2>
+        <div style={containerStyle}>
+            {/* Logo */}
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                <h1 style={{
+                    fontSize: '3.5rem',
+                    fontWeight: '900',
+                    margin: 0,
+                    background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                }}>
+                    APEX
+                </h1>
+                <h2 style={{
+                    fontSize: '1.3rem',
+                    margin: 0,
+                    color: '#fbbf24',
+                    letterSpacing: '8px'
+                }}>
+                    STACK
+                </h2>
+            </div>
 
             {myStatus === 'selecting' && (
-                <div style={{ width: '100%', maxWidth: '350px', background: '#222', p: '30px', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', padding: '30px' }}>
-                    <h3 style={{ color: 'white', textAlign: 'center', marginBottom: '20px' }}>ENTER THE ARENA</h3>
+                <div style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '24px',
+                    padding: '35px',
+                    width: '100%',
+                    maxWidth: '380px',
+                    border: '1px solid rgba(255,255,255,0.05)'
+                }}>
+                    <h3 style={{
+                        color: 'white',
+                        textAlign: 'center',
+                        marginBottom: '25px',
+                        fontSize: '1.3rem',
+                        fontWeight: '500'
+                    }}>
+                        Join Room <span style={{ color: '#fbbf24' }}>{roomCode}</span>
+                    </h3>
+
                     <input
                         type="text"
-                        placeholder="YOUR NAME"
-                        id="player-name-input"
+                        placeholder="Enter your name"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
                         style={{
-                            width: '100%', padding: '15px', marginBottom: '20px',
-                            borderRadius: '8px', border: '2px solid #444',
-                            background: '#111', color: 'white', fontSize: '1.2rem', textAlign: 'center'
+                            width: '100%',
+                            padding: '16px',
+                            marginBottom: '20px',
+                            borderRadius: '12px',
+                            border: '2px solid rgba(255,255,255,0.1)',
+                            background: 'rgba(0,0,0,0.3)',
+                            color: 'white',
+                            fontSize: '1.1rem',
+                            textAlign: 'center',
+                            outline: 'none',
+                            boxSizing: 'border-box'
                         }}
                     />
-                    <div style={{ display: 'grid', gap: '15px' }}>
-                        <button onClick={() => handleRoleSelect('player')} className="btn-action btn-primary" style={{ fontSize: '1rem', width: '100%' }}>
-                            JOIN AS PLAYER
-                        </button>
-                        <button onClick={() => handleRoleSelect('observer')} className="btn-action btn-secondary" style={{ fontSize: '1rem', width: '100%', background: 'transparent', border: '1px solid #444' }}>
-                            WATCH AS OBSERVER
-                        </button>
-                    </div>
+
+                    <button
+                        onClick={() => handleRoleSelect('player')}
+                        disabled={!playerName.trim()}
+                        style={{
+                            width: '100%',
+                            padding: '16px',
+                            marginBottom: '12px',
+                            background: playerName.trim()
+                                ? 'linear-gradient(135deg, #22c55e, #16a34a)'
+                                : 'rgba(255,255,255,0.1)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            cursor: playerName.trim() ? 'pointer' : 'not-allowed',
+                            opacity: playerName.trim() ? 1 : 0.5,
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        🎮 Join as Player
+                    </button>
+
+                    <button
+                        onClick={() => handleRoleSelect('observer')}
+                        style={{
+                            width: '100%',
+                            padding: '14px',
+                            background: 'transparent',
+                            color: '#9ca3af',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            fontSize: '0.95rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        👁 Watch as Observer
+                    </button>
                 </div>
             )}
 
             {myStatus === 'waiting' && (
-                <div style={{ textAlign: 'center', color: 'white' }}>
-                    <div className="loader" style={{ margin: '0 auto 20px auto' }}></div>
-                    <h2>Waiting for Banker...</h2>
-                    <p style={{ color: '#888' }}>Sit tight.</p>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{
+                        width: '60px',
+                        height: '60px',
+                        border: '4px solid rgba(251,191,36,0.2)',
+                        borderTopColor: '#fbbf24',
+                        borderRadius: '50%',
+                        margin: '0 auto 25px',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <h2 style={{ color: 'white', marginBottom: '10px' }}>Waiting for Host</h2>
+                    <p style={{ color: '#6b7280' }}>The host will accept you shortly...</p>
+
+                    <style>{`
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    `}</style>
                 </div>
             )}
 
             {myStatus === 'active' && (
-                <div style={{ textAlign: 'center', color: 'var(--color-gold)' }}>
-                    <h1>YOU ARE IN</h1>
-                    <p>Prepare yourself.</p>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{
+                        fontSize: '4rem',
+                        marginBottom: '20px'
+                    }}>✅</div>
+                    <h2 style={{ color: '#22c55e', marginBottom: '10px' }}>You're In!</h2>
+                    <p style={{ color: '#6b7280' }}>Waiting for the game to start...</p>
                 </div>
             )}
         </div>
