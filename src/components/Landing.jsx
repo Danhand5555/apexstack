@@ -4,12 +4,13 @@ import { useGame } from '../core/GameContext';
 const Landing = ({ onCreateRoom, onJoinRoom }) => {
     const [joinCode, setJoinCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [gameType, setGameType] = useState('blackjack');
 
     const handleCreateClick = async () => {
-        console.log("Create button clicked");
+        console.log("Create button clicked", gameType);
         setIsLoading(true);
         try {
-            await onCreateRoom();
+            await onCreateRoom(gameType);
         } catch (e) {
             console.error("Create failed in Landing:", e);
         } finally {
@@ -51,6 +52,39 @@ const Landing = ({ onCreateRoom, onJoinRoom }) => {
                 width: '100%',
                 maxWidth: '300px'
             }}>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    <button
+                        onClick={() => setGameType('blackjack')}
+                        style={{
+                            flex: 1,
+                            padding: '10px',
+                            background: gameType === 'blackjack' ? 'var(--color-crimson)' : '#333',
+                            color: 'white',
+                            border: `2px solid ${gameType === 'blackjack' ? 'var(--color-crimson)' : '#555'}`,
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            opacity: gameType === 'blackjack' ? 1 : 0.7
+                        }}
+                    >
+                        BLACKJACK
+                    </button>
+                    <button
+                        onClick={() => setGameType('slave')}
+                        style={{
+                            flex: 1,
+                            padding: '10px',
+                            background: gameType === 'slave' ? 'var(--color-crimson)' : '#333',
+                            color: 'white',
+                            border: `2px solid ${gameType === 'slave' ? 'var(--color-crimson)' : '#555'}`,
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            opacity: gameType === 'slave' ? 1 : 0.7
+                        }}
+                    >
+                        SLAVE
+                    </button>
+                </div>
+
                 <button
                     onClick={handleCreateClick}
                     disabled={isLoading}
@@ -68,7 +102,7 @@ const Landing = ({ onCreateRoom, onJoinRoom }) => {
                         cursor: isLoading ? 'wait' : 'pointer'
                     }}
                 >
-                    {isLoading ? 'Creating Room...' : 'Create New Room'}
+                    {isLoading ? 'Creating Room...' : `Create ${gameType === 'slave' ? 'Slave' : 'Blackjack'} Room`}
                 </button>
 
                 <div className="separator" style={{

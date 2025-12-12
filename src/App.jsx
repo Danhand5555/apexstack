@@ -6,14 +6,15 @@ import Lobby from './components/Lobby';
 import BankerView from './views/BankerView';
 import PlayerView from './views/PlayerView';
 import ObserverView from './views/ObserverView';
+import SlaveGameView from './views/SlaveGameView';
 
 function App() {
   const { gameState, setRoomCode, setPlayerId, setPlayerRole, playerRole } = useGame();
   const [view, setView] = useState('landing'); // landing, lobby, game
 
-  const handleCreateRoom = async () => {
+  const handleCreateRoom = async (gameType) => {
     try {
-      const code = await createRoom();
+      const code = await createRoom(gameType);
       const myId = "banker_" + Date.now(); // Simple ID generation
 
       // creator is automatically Banker for now, or goes to lobby as Banker
@@ -42,6 +43,10 @@ function App() {
   };
 
   const renderGameView = () => {
+    if (gameState?.gameType === 'slave') {
+      return <SlaveGameView />;
+    }
+
     switch (playerRole) {
       case 'banker': return <BankerView />;
       case 'player': return <PlayerView />;

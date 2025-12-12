@@ -49,7 +49,23 @@ const Lobby = ({ onGameStart }) => {
         try { await setRoomGoal(roomCode, goalInput); } catch (e) { console.error(e); }
     };
 
-    const handleStartGame = () => { onGameStart(); };
+    const handleStartGame = async () => {
+        try {
+            if (gameState?.gameType === 'slave') {
+                // Import dynamically or assuming it's imported at top
+                // Since this file is big, adding import at top is safer.
+                // But for tool efficiency, I will replace here.
+                const { startSlaveGame } = await import('../core/slaveHelpers');
+                await startSlaveGame(roomCode);
+            } else {
+                await dealInitialHands(roomCode);
+            }
+            onGameStart();
+        } catch (e) {
+            console.error("Failed to start game:", e);
+            alert("Error: " + e.message);
+        }
+    };
 
     // --- RENDER BANKER LOBBY ---
     if (playerRole === 'banker') {

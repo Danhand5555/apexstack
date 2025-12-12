@@ -12,13 +12,14 @@ export const generateRoomCode = () => {
     return code;
 };
 
-export const createRoom = async () => {
+export const createRoom = async (gameType = 'blackjack') => {
     const roomCode = generateRoomCode();
     // In a real app, check for collision. MVP: assume unique or handle error.
 
     // Default initial game state
     const initialState = {
         roomCode,
+        gameType, // Store the selected game type
         status: 'lobby', // lobby, playing, payout
         bankerId: null, // Will be set to the creator
         turn: null,
