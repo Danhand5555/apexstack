@@ -12,7 +12,7 @@ export const generateRoomCode = () => {
     return code;
 };
 
-export const createRoom = async (gameType = 'blackjack') => {
+export const createRoom = async (gameType = 'blackjack', creatorId = null) => {
     const roomCode = generateRoomCode();
     // In a real app, check for collision. MVP: assume unique or handle error.
 
@@ -21,7 +21,7 @@ export const createRoom = async (gameType = 'blackjack') => {
         roomCode,
         gameType, // Store the selected game type
         status: 'lobby', // lobby, playing, payout
-        bankerId: null, // Will be set to the creator
+        bankerId: creatorId, // Set to the creator
         turn: null,
         players: [], // sub-collections are better for scalability, but array is easier for MVP sync if small
         deck: [],

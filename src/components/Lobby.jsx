@@ -8,7 +8,7 @@ const Lobby = ({ onGameStart }) => {
     const { gameState, roomCode, playerId, playerRole, setPlayerRole } = useGame();
     const [players, setPlayers] = useState([]);
     const [myStatus, setMyStatus] = useState(playerRole === 'banker' ? 'active' : 'selecting');
-    const [goalInput, setGoalInput] = useState('2000');
+    const [goalInput, setGoalInput] = useState('1');
 
     // Subscribe to players
     useEffect(() => {
@@ -72,24 +72,34 @@ const Lobby = ({ onGameStart }) => {
         const waitingPlayers = players.filter(p => p.status === 'waiting' && p.role === 'player');
         const activePlayers = players.filter(p => p.status === 'active' && p.role === 'player');
         const observers = players.filter(p => p.role === 'observer'); // Show all observers
+        const isSlave = gameState?.gameType === 'slave';
 
         return (
             <div className="game-table" style={{ padding: '40px', alignItems: 'center' }}>
                 <h1 style={{ color: 'var(--color-gold)', fontSize: '3.5rem', margin: 0 }}>LOBBY</h1>
                 <h2 style={{ color: 'white', letterSpacing: '2px', marginTop: '10px' }}>CODE: <span style={{ fontFamily: 'monospace', fontSize: '1.2em' }}>{roomCode}</span></h2>
+                <p style={{ color: '#888', marginTop: '5px' }}>Game: {isSlave ? '👑 SLAVE (President)' : '🃏 Blackjack'}</p>
 
+                {/* GAME SETTINGS */}
                 <div style={{ margin: '30px 0', display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(0,0,0,0.5)', padding: '20px', borderRadius: '12px' }}>
-                    <label style={{ color: 'white', fontWeight: 'bold' }}>GAME GOAL ($):</label>
+                    <label style={{ color: 'white', fontWeight: 'bold' }}>
+                        {isSlave ? 'ROUND LIMIT:' : 'GAME GOAL ($):'}
+                    </label>
                     <input
                         type="number"
                         value={goalInput}
                         onChange={(e) => setGoalInput(e.target.value)}
+                        placeholder={isSlave ? '10' : '2000'}
                         style={{ padding: '10px', borderRadius: '6px', border: '1px solid #666', fontSize: '1.2rem', background: '#333', color: 'white', width: '100px' }}
                     />
                     <button onClick={handleSetGoal} className="btn-action" style={{ padding: '10px 20px', fontSize: '1rem', background: 'var(--color-gold)', color: 'black' }}>
-                        SET GOAL
+                        SET {isSlave ? 'ROUNDS' : 'GOAL'}
                     </button>
-                    {gameState?.winningGoal && <span style={{ color: '#4caf50', marginLeft: '10px' }}>✓ Target: ${gameState.winningGoal}</span>}
+                    {gameState?.winningGoal && (
+                        <span style={{ color: '#4caf50', marginLeft: '10px' }}>
+                            ✓ {isSlave ? `${gameState.winningGoal} rounds` : `$${gameState.winningGoal}`}
+                        </span>
+                    )}
                 </div>
 
                 <div style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -116,7 +126,7 @@ const Lobby = ({ onGameStart }) => {
                         {activePlayers.map(p => (
                             <div key={p.id} style={{ padding: '10px', borderBottom: '1px solid #333', color: 'white' }}>
                                 <span>{p.name}</span>
-                                <span style={{ float: 'right', color: 'var(--color-gold)' }}>${p.chips}</span>
+                                {!isSlave && <span style={{ float: 'right', color: 'var(--color-gold)' }}>${p.chips}</span>}
                             </div>
                         ))}
                     </div>

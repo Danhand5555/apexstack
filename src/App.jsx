@@ -14,13 +14,20 @@ function App() {
 
   const handleCreateRoom = async (gameType) => {
     try {
-      const code = await createRoom(gameType);
-      const myId = "banker_" + Date.now(); // Simple ID generation
+      const myId = "banker_" + Date.now(); // Generate ID first
+      const code = await createRoom(gameType, myId); // Pass ID to createRoom
 
-      // creator is automatically Banker for now, or goes to lobby as Banker
+      // If Slave game, the Host is also a Player
+      if (gameType === 'slave') {
+        // Import here or standard
+        const { joinAsRole } = await import('./core/gameHelpers');
+        await joinAsRole(code, myId, 'player', 'HOST');
+      }
+
+      // creator is automatically Banker/Host
       setRoomCode(code);
       setPlayerId(myId);
-      setPlayerRole('banker');
+      setPlayerRole('banker'); // Keep as banker to trigger Host view in Lobby
       setView('lobby');
     } catch (e) {
       console.error("Error creating room:", e);
