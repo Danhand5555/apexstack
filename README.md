@@ -1,16 +1,63 @@
-# React + Vite
+# APEX STACK 🎴
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Premium multiplayer card game platform
 
-Currently, two official plugins are available:
+## Features
+- 🃏 **Blackjack** - Classic casino game
+- 👑 **President (Slave)** - Strategic elimination game
+- 🔄 **Real-time multiplayer** via Firebase
+- 📱 **Mobile-responsive** design
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Quick Start
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
+- React 18 + Vite
+- Firebase Firestore (real-time database)
+- Vercel (deployment)
 
-## Expanding the ESLint configuration
+## Project Structure
+```
+src/
+├── core/           # Game logic & Firebase
+│   ├── gameHelpers.js      # Blackjack logic
+│   └── slaveHelpers.js     # President logic
+├── components/     # Shared components
+│   ├── Landing.jsx         # Home screen
+│   ├── Lobby.jsx           # Game lobby
+│   └── Card.jsx            # Card component
+└── views/          # Game-specific views
+    ├── SlaveGameView.jsx   # President game
+    ├── BankerView.jsx      # Blackjack dealer
+    └── PlayerView.jsx      # Blackjack player
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Adding a New Game
+
+1. Create `src/core/newGameHelpers.js` with game logic
+2. Create `src/views/NewGameView.jsx` for UI
+3. Add game type to `Landing.jsx` selection
+4. Register in `App.jsx` router
+5. Update `Lobby.jsx` start handler
+
+See [walkthrough.md](.gemini/antigravity/brain/*/walkthrough.md) for detailed docs.
+
+## Environment Variables
+```env
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MSG_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+```
+
+## Deployment
+Push to `main` → Auto-deploys to Vercel
+
+## License
+MIT
